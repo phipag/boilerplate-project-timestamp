@@ -36,15 +36,13 @@ const preprocessDateString = (req, res, next) => {
 };
 
 app.get('/api/timestamp/:date_string?', preprocessDateString, (req, res) => {
-    try {
-        const parsedDate = new Date(req.params.date_string);
-        return res.status(200).json({
+    const parsedDate = new Date(req.params.date_string);
+    return parsedDate.toString() === 'Invalid Date'
+        ? res.status(422).send({ error: 'Invalid Date' })
+        : res.status(200).json({
             unix: parsedDate.getTime(),
             utc: parsedDate.toUTCString()
         });
-    } catch (e) {
-        return res.status(422).send({ error: 'Invalid Date' });
-    }
 });
 
 // listen for requests :)
