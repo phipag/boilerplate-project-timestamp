@@ -14,16 +14,36 @@ app.use(cors({ optionSuccessStatus: 200 }));  // some legacy browsers choke on 2
 app.use(express.static('public'));
 
 // http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (req, res) {
+app.get('/', function (req, res) {
     res.sendFile(__dirname + '/views/index.html');
 });
 
+const preprocessDateString = (req, res, next) => {
+    const rawDateString = req.params.date_string;
+    let preprocessedDateString;
+    if (!rawDateString) {
+        preprocessedDateString = new Date();
+    } else if (!isNaN(parseInt(rawDateString, 10))) {
+        preprocessedDateString = new Date(parseInt(rawDateString, 10));
+    } else {
+        preprocessedDateString = rawDateString;
+    }
+    req.params.date_string = preprocessedDateString;
 
-// your first API endpoint...
-app.get("/api/hello", function (req, res) {
-    res.json({ greeting: 'hello API' });
+    next();
+};
+
+app.get('/api/timestamp/:date_string?', preprocessDateString, (req, res) => {
+    try {
+        const parsedDate = new Date(req.params.date_string);
+        return res.status(200).json({
+            unix: parsedDate.getTime(),
+            utc: parsedDate.toUTCString()
+        });
+    } catch (e) {
+        return res.status(422).send({ error: 'Invalid Date' });
+    }
 });
-
 
 // listen for requests :)
 const listener = app.listen(process.env.PORT, function () {
