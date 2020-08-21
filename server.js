@@ -25,8 +25,8 @@ const preprocessDateString = (req, res, next) => {
     let preprocessedDateString;
     if (!rawDateString) {
         preprocessedDateString = new Date();
-    } else if (!isNaN(parseInt(rawDateString, 10))) {
-        preprocessedDateString = new Date(parseInt(rawDateString, 10));
+    } else if (/^\d+$/.test(rawDateString)) {
+        preprocessedDateString = parseInt(rawDateString, 10);
     } else {
         preprocessedDateString = rawDateString;
     }
